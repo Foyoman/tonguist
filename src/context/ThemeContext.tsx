@@ -1,7 +1,12 @@
 import React, {createContext, useState, useEffect, ReactNode} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Appearance, StyleSheet} from 'react-native';
-import {MD3LightTheme, MD3DarkTheme, MD3Colors} from 'react-native-paper';
+import {
+  MD3LightTheme,
+  MD3DarkTheme,
+  MD3Colors,
+  MD2Colors,
+} from 'react-native-paper';
 import {Theme} from '@react-navigation/native';
 
 const NavigationLightTheme = {
@@ -41,7 +46,10 @@ const lightThemeStyles = StyleSheet.create({
     color: MD3Colors.neutral0,
   },
   textSecondary: {
-    color: MD3Colors.neutral10,
+    color: MD3Colors.neutral20,
+  },
+  textTertiary: {
+    color: MD3Colors.primary60,
   },
   card: {
     backgroundColor: MD3Colors.neutral90,
@@ -53,11 +61,21 @@ const lightThemeStyles = StyleSheet.create({
   pill: {
     backgroundColor: MD3Colors.neutral80,
   },
-  dot: {
+  bar: {
     backgroundColor: MD3Colors.neutral70,
   },
-  dotProgress: {
+  barProgress: {
     backgroundColor: MD3Colors.primary60,
+  },
+  correct: {
+    color: MD2Colors.teal500,
+    backgroundColor: '#00968840',
+  },
+  listItem: {
+    backgroundColor: MD3Colors.neutral90,
+  },
+  input: {
+    color: MD3Colors.neutral0,
   },
 });
 
@@ -70,7 +88,10 @@ const darkThemeStyles = StyleSheet.create({
     color: MD3Colors.neutral100,
   },
   textSecondary: {
-    color: MD3Colors.neutral90,
+    color: MD3Colors.neutral80,
+  },
+  textTertiary: {
+    color: MD3Colors.primary70,
   },
   card: {
     backgroundColor: MD3Colors.neutral10,
@@ -82,11 +103,22 @@ const darkThemeStyles = StyleSheet.create({
   pill: {
     backgroundColor: MD3Colors.neutral20,
   },
-  dot: {
+  bar: {
     backgroundColor: MD3Colors.neutral30,
   },
-  dotProgress: {
+  barProgress: {
     backgroundColor: MD3Colors.primary70,
+  },
+  correct: {
+    color: MD2Colors.green300,
+    backgroundColor: '#81c78440',
+  },
+  listItem: {
+    backgroundColor: MD3Colors.neutral10,
+  },
+  input: {
+    color: MD3Colors.neutral100,
+    borderColor: MD3Colors.neutral30,
   },
 });
 

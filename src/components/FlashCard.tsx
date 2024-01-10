@@ -1,30 +1,35 @@
-import React, {useContext, useState} from 'react';
-import {StyleSheet, View, Text, TextInput} from 'react-native';
+import React, {useContext, useRef, useState} from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  NativeSyntheticEvent,
+  TextInputChangeEventData,
+} from 'react-native';
 import {ThemeContext} from '../context/ThemeContext';
 import {MD3Colors} from 'react-native-paper';
 
-interface CardProps {
-  targetPhrase: string;
-  targetSentence: string;
-  grammarClasses: string[];
-  translatedPhrase: string;
-  translatedSentence: string;
-}
+import {FlashcardComponent} from '../types';
 
-const FlashCard: React.FC<CardProps> = ({
-  targetSentence,
-  targetPhrase,
-  grammarClasses,
-  translatedPhrase,
-  translatedSentence,
+const Flashcard: React.FC<FlashcardComponent> = ({
+  flashcard,
+  progressGoal = 10,
+  correct = false,
+  incorrect = false,
+  inputValue,
+  setInputValue,
+  handleSubmit,
+  autoFocus = true,
 }) => {
   const {themeStyles, theme} = useContext(ThemeContext);
-  const splitSentence = targetSentence.split(targetPhrase);
-  const afterTextSplit = splitSentence[1].match(/\S+|\s/g);
+  const splitSentence = flashcard.targetSentence.split(flashcard.targetPhrase);
+  const afterTextSplit = splitSentence[1]?.match(/\S+|\s/g);
   const [inputWidth, setInputWidth] = useState<number | null>(null);
-  const grammarClassesStr = grammarClasses.join(', ');
+  const grammarClassesStr = flashcard.grammarClasses.join(', ');
+  const inputRef = useRef<TextInput>(null); // Create a ref for the TextInput
 
-  const afterText = afterTextSplit!.map((word, index) => {
+  const afterText = afterTextSplit?.map((word, index) => {
     return (
       <Text style={[themeStyles.textPrimary, styles.textPrimary]} key={index}>
         {word}
@@ -32,20 +37,44 @@ const FlashCard: React.FC<CardProps> = ({
     );
   });
 
+  const progressBars = [];
+
+  for (let i = 0; i < progressGoal; i++) {
+    const barStyle =
+      i <= flashcard.progress - 1 ? themeStyles.barProgress : themeStyles.bar;
+
+    progressBars.push(<View key={i} style={[barStyle, styles.bar]} />);
+  }
+
+  const handleOnSubmitEditing = () => {
+    if (handleSubmit && !correct) {
+      handleSubmit();
+    }
+
+    inputRef.current?.focus();
+  };
+
+  const handleOnChange = (
+    e: NativeSyntheticEvent<TextInputChangeEventData>,
+  ) => {
+    if (setInputValue) {
+      if (!correct) {
+        setInputValue(e.nativeEvent.text);
+      } else {
+        e.preventDefault();
+        setInputValue(flashcard.targetPhrase);
+      }
+    }
+  };
+
   return (
     <View>
       <View style={[themeStyles.card, styles.card]}>
-        <View style={styles.dots}>
-          <View style={[themeStyles.dotProgress, styles.dot]} />
-          <View style={[themeStyles.dotProgress, styles.dot]} />
-          <View style={[themeStyles.dotProgress, styles.dot]} />
-          <View style={[themeStyles.dotProgress, styles.dot]} />
-          <View style={[themeStyles.dotProgress, styles.dot]} />
-          <View style={[themeStyles.dot, styles.dot]} />
-          <View style={[themeStyles.dot, styles.dot]} />
-          <View style={[themeStyles.dot, styles.dot]} />
-          <View style={[themeStyles.dot, styles.dot]} />
-          <View style={[themeStyles.dot, styles.dot]} />
+        <View style={styles.bars}>
+          {progressBars}
+          <Text style={[themeStyles.textTertiary, styles.progressText]}>
+            {flashcard.progress}
+          </Text>
         </View>
 
         <View style={styles.inlineContainer}>
@@ -56,12 +85,27 @@ const FlashCard: React.FC<CardProps> = ({
             style={[
               themeStyles.cardInput,
               styles.cardInput,
+              correct && !incorrect ? themeStyles.correct : null,
               {width: inputWidth},
             ]}
-            placeholder={targetPhrase}
+            selectionColor={correct ? 'transparent' : MD3Colors.primary50}
+            autoFocus={autoFocus}
+            autoComplete="off"
+            autoCorrect={false}
+            autoCapitalize="none"
+            spellCheck={false}
+            ref={inputRef}
+            placeholder={incorrect ? flashcard.targetPhrase : ''}
             placeholderTextColor={
               theme === 'light' ? MD3Colors.neutral30 : MD3Colors.neutral70
             }
+            value={inputValue}
+            onChange={e => handleOnChange(e)}
+            // onChangeText={input => handleOnChangeText(input)}
+            onSubmitEditing={handleOnSubmitEditing}
+            returnKeyType="done" // Optional: changes the label on the return key (varies by keyboard type)
+            blurOnSubmit={false} // Optional: keyboard stays open after pressing return key
+            // editable={!correct}
           />
           {afterText}
         </View>
@@ -74,7 +118,7 @@ const FlashCard: React.FC<CardProps> = ({
 
       <View style={[themeStyles.card, styles.card]}>
         <Text style={[themeStyles.textPrimary, styles.textPrimary]}>
-          {translatedPhrase}
+          {flashcard.translatedPhrase}
         </Text>
         <Text
           style={[
@@ -82,18 +126,19 @@ const FlashCard: React.FC<CardProps> = ({
             styles.textPrimary,
             styles.translatedSentence,
           ]}>
-          {translatedSentence}
+          {flashcard.translatedSentence}
         </Text>
       </View>
 
       <TextInput
+        editable={false}
         pointerEvents="none"
         style={styles.inputWidth}
         onLayout={event => {
           const {width} = event.nativeEvent.layout;
           setInputWidth(width);
         }}>
-        {targetPhrase}
+        {flashcard.targetPhrase}
       </TextInput>
     </View>
   );
@@ -102,15 +147,9 @@ const FlashCard: React.FC<CardProps> = ({
 const styles = StyleSheet.create({
   card: {
     borderRadius: 8,
-    // shadowColor: MD3Colors.neutral0,
-    // shadowOffset: {width: 0, height: 2},
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
-    // elevation: 5, // for Android shadow
     padding: 16,
-    // margin: 16,
-    marginTop: 16,
-    marginHorizontal: 16,
+    paddingTop: 12,
+    marginBottom: 12,
   },
   inlineContainer: {
     display: 'flex',
@@ -148,18 +187,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     marginTop: 12,
-    // width: 'auto',
   },
-  dots: {
+  bars: {
     display: 'flex',
     flexDirection: 'row',
     gap: 6,
-    marginBottom: 12,
+    marginBottom: 8,
+    alignItems: 'center',
   },
-  dot: {
+  bar: {
     width: 12,
     height: 6,
     borderRadius: 3,
+  },
+  progressText: {
+    marginLeft: 2,
   },
   translatedSentence: {
     fontSize: 14,
@@ -167,4 +209,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FlashCard;
+export default Flashcard;
