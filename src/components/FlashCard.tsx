@@ -41,7 +41,9 @@ const Flashcard: React.FC<FlashcardComponent> = ({
 
   for (let i = 0; i < progressGoal; i++) {
     const barStyle =
-      i <= flashcard.progress - 1 ? themeStyles.barProgress : themeStyles.bar;
+      i <= flashcard.progress - 1
+        ? themeStyles.backgroundTertiary
+        : themeStyles.bar;
 
     progressBars.push(<View key={i} style={[barStyle, styles.bar]} />);
   }
@@ -69,7 +71,7 @@ const Flashcard: React.FC<FlashcardComponent> = ({
 
   return (
     <View>
-      <View style={[themeStyles.card, styles.card]}>
+      <View style={[themeStyles.backgroundPrimary, styles.card]}>
         <View style={styles.bars}>
           {progressBars}
           <Text style={[themeStyles.textTertiary, styles.progressText]}>
@@ -83,7 +85,8 @@ const Flashcard: React.FC<FlashcardComponent> = ({
           </Text>
           <TextInput
             style={[
-              themeStyles.cardInput,
+              themeStyles.textPrimary,
+              themeStyles.backgroundSecondary,
               styles.cardInput,
               correct && !incorrect ? themeStyles.correct : null,
               {width: inputWidth},
@@ -101,22 +104,23 @@ const Flashcard: React.FC<FlashcardComponent> = ({
             }
             value={inputValue}
             onChange={e => handleOnChange(e)}
-            // onChangeText={input => handleOnChangeText(input)}
             onSubmitEditing={handleOnSubmitEditing}
-            returnKeyType="done" // Optional: changes the label on the return key (varies by keyboard type)
-            blurOnSubmit={false} // Optional: keyboard stays open after pressing return key
-            // editable={!correct}
+            returnKeyType="done"
+            blurOnSubmit={false}
           />
           {afterText}
         </View>
-        <View style={[themeStyles.pill, styles.pill]}>
-          <Text style={[themeStyles.textSecondary, styles.textSecondary]}>
-            {grammarClassesStr}
-          </Text>
-        </View>
+
+        {grammarClassesStr && (
+          <View style={[themeStyles.backgroundSecondary, styles.pill]}>
+            <Text style={[themeStyles.textSecondary, styles.textSecondary]}>
+              {grammarClassesStr}
+            </Text>
+          </View>
+        )}
       </View>
 
-      <View style={[themeStyles.card, styles.card]}>
+      <View style={[themeStyles.backgroundPrimary, styles.card]}>
         <Text style={[themeStyles.textPrimary, styles.textPrimary]}>
           {flashcard.translatedPhrase}
         </Text>

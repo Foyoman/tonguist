@@ -10,7 +10,7 @@ import DetailsPage from '../screens/DetailsPage';
 import EditPage from '../screens/EditPage';
 
 // Define the types for navigation parameters for each screen
-import {RootStackParamList} from '../types/pages';
+import {RootStackParamList} from '../types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 

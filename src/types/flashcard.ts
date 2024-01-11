@@ -1,9 +1,5 @@
-// import {
-//   NativeSyntheticEvent,
-//   TextInputSubmitEditingEventData,
-// } from 'react-native';
-
 export interface Flashcard {
+  id: string;
   targetPhrase: string;
   targetSentence: string;
   grammarClasses: string[];

@@ -51,28 +51,21 @@ const lightThemeStyles = StyleSheet.create({
   textTertiary: {
     color: MD3Colors.primary60,
   },
-  card: {
+  backgroundPrimary: {
     backgroundColor: MD3Colors.neutral90,
   },
-  cardInput: {
-    color: MD3Colors.neutral0,
+  backgroundSecondary: {
     backgroundColor: MD3Colors.neutral80,
   },
-  pill: {
-    backgroundColor: MD3Colors.neutral80,
+  backgroundTertiary: {
+    backgroundColor: MD3Colors.primary60,
   },
   bar: {
     backgroundColor: MD3Colors.neutral70,
   },
-  barProgress: {
-    backgroundColor: MD3Colors.primary60,
-  },
   correct: {
     color: MD2Colors.teal500,
     backgroundColor: '#00968840',
-  },
-  listItem: {
-    backgroundColor: MD3Colors.neutral90,
   },
   input: {
     color: MD3Colors.neutral0,
@@ -93,28 +86,21 @@ const darkThemeStyles = StyleSheet.create({
   textTertiary: {
     color: MD3Colors.primary70,
   },
-  card: {
+  backgroundPrimary: {
     backgroundColor: MD3Colors.neutral10,
   },
-  cardInput: {
-    color: MD3Colors.neutral100,
+  backgroundSecondary: {
     backgroundColor: MD3Colors.neutral20,
   },
-  pill: {
-    backgroundColor: MD3Colors.neutral20,
+  backgroundTertiary: {
+    backgroundColor: MD3Colors.primary70,
   },
   bar: {
     backgroundColor: MD3Colors.neutral30,
   },
-  barProgress: {
-    backgroundColor: MD3Colors.primary70,
-  },
   correct: {
     color: MD2Colors.green300,
     backgroundColor: '#81c78440',
-  },
-  listItem: {
-    backgroundColor: MD3Colors.neutral10,
   },
   input: {
     color: MD3Colors.neutral100,

@@ -1,16 +1,25 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useLayoutEffect,
+} from 'react';
 import {View, Button, StyleSheet} from 'react-native';
 import {ThemeContext} from '../context/ThemeContext';
 import {ThemeToggleButton} from '../components/ThemeToggleButton';
 
 import {MD3Colors, ProgressBar} from 'react-native-paper';
-import {useTodaysProgress} from '../hooks/useTodaysProgress';
+
+import {useProgress} from '../hooks/useProgress';
+import {Progress} from '../types';
 
 const HomePage = ({navigation}: any) => {
   const {theme, toggleTheme} = useContext(ThemeContext);
-  const {fetchTodaysProgress} = useTodaysProgress();
   const isDarkMode = theme === 'dark';
-  const [todaysProgress, setTodaysProgress] = useState(0);
+
+  const {fetchProgressData} = useProgress();
+  const [todaysProgress, setTodaysProgress] = useState<Progress>();
 
   const headerRight = useCallback(
     () => (
@@ -19,25 +28,27 @@ const HomePage = ({navigation}: any) => {
     [toggleTheme, isDarkMode],
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({headerRight});
   }, [navigation, headerRight]);
 
   useEffect(() => {
     const initializeProgress = async () => {
-      const progress = await fetchTodaysProgress();
-      setTodaysProgress(progress);
+      const progressData = await fetchProgressData();
+      setTodaysProgress(progressData);
     };
 
     initializeProgress();
-  }, [fetchTodaysProgress]);
+  }, [fetchProgressData]);
 
   return (
     <View style={styles.container}>
-      <ProgressBar
-        progress={todaysProgress / 50}
-        color={theme === 'light' ? MD3Colors.primary60 : MD3Colors.primary70}
-      />
+      {todaysProgress && (
+        <ProgressBar
+          progress={todaysProgress?.cardsCompleted / 50}
+          color={theme === 'light' ? MD3Colors.primary60 : MD3Colors.primary70}
+        />
+      )}
       <Button title="Learn" onPress={() => navigation.navigate('Learn')} />
       <Button
         title="Dictionary"

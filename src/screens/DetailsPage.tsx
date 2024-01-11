@@ -17,7 +17,6 @@ type DetailsPageProps = {
 };
 
 const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
-  // const {themeStyles} = useContext(ThemeContext);
   const {flashcard} = route.params;
 
   const handleEdit = () => {
@@ -68,10 +67,7 @@ const styles = StyleSheet.create({
   buttons: {
     display: 'flex',
     gap: 10,
-    // flexDirection: 'row',
-    // justifyContent: 'space-between',
   },
-  // ... other styles
 });
 
 export default DetailsPage;

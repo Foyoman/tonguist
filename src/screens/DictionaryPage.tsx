@@ -48,7 +48,7 @@ const DictionaryPage: React.FC<DictionaryPageProps> = ({navigation}) => {
         keyExtractor={(item, index) => `flashcard-${index}`}
         renderItem={({item}) => (
           <TouchableOpacity onPress={() => handlePressFlashcard(item)}>
-            <View style={[themeStyles.listItem, styles.listItem]}>
+            <View style={[themeStyles.backgroundPrimary, styles.listItem]}>
               <Text style={[themeStyles.textPrimary, styles.heading]}>
                 {item.targetPhrase}
               </Text>

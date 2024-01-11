@@ -1,3 +1,4 @@
+import {StackNavigationProp} from '@react-navigation/stack';
 import {Flashcard} from './flashcard';
 
 export type RootStackParamList = {
@@ -7,4 +8,9 @@ export type RootStackParamList = {
   Learn: undefined; // No parameters expected for Learn
   Dictionary: undefined; // No parameters expected for Dictionary
   // ... other screens
+};
+
+type LearnPageNavigationProp = StackNavigationProp<RootStackParamList, 'Learn'>;
+export type LearnPageProps = {
+  navigation: LearnPageNavigationProp;
 };
