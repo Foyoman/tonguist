@@ -1,50 +1,42 @@
 import React, {useContext} from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text, StyleProp, ViewStyle} from 'react-native';
 import {ThemeContext} from '../context/ThemeContext';
 
 interface ProgressBarProps {
   progress: number;
+  goal: number;
+  style?: StyleProp<ViewStyle>;
 }
 
-const ProgressBar = ({progress}: ProgressBarProps) => {
+const ProgressBar = ({progress, goal, style}: ProgressBarProps) => {
   const {themeStyles} = useContext(ThemeContext);
+  const percentage = Math.min((progress / goal) * 100, 100);
 
   return (
-    <View style={styles.progressContainer}>
+    <View style={[styles.progressContainer, style]}>
       <View style={[themeStyles.backgroundPrimary, styles.progressBar]}>
         <View
           style={[
             themeStyles.backgroundTertiary,
             styles.progressBarProgress,
-            {width: `${(progress / 50) * 100}%`},
+            {width: `${percentage}%`},
           ]}
         />
       </View>
       <Text style={[themeStyles.textTertiary, styles.progressText]}>
-        {progress} / 50
+        {progress} / {goal}
       </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  spinnerContainer: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    paddingTop: 60,
-  },
   progressContainer: {
-    height: '100%',
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingRight: 32,
   },
   progressBar: {
     borderRadius: 2,

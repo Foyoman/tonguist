@@ -69,6 +69,7 @@ const lightThemeStyles = StyleSheet.create({
   },
   input: {
     color: MD3Colors.neutral0,
+    borderColor: MD3Colors.neutral70,
   },
 });
 

@@ -9,10 +9,9 @@ import {View, Button, StyleSheet} from 'react-native';
 import {ThemeContext} from '../context/ThemeContext';
 import {ThemeToggleButton} from '../components/ThemeToggleButton';
 
-import {MD3Colors, ProgressBar} from 'react-native-paper';
-
 import {useProgress} from '../hooks/useProgress';
 import {Progress} from '../types';
+import ProgressBar from '../components/ProgressBar';
 
 const HomePage = ({navigation}: any) => {
   const {theme, toggleTheme} = useContext(ThemeContext);
@@ -44,10 +43,7 @@ const HomePage = ({navigation}: any) => {
   return (
     <View style={styles.container}>
       {todaysProgress && (
-        <ProgressBar
-          progress={todaysProgress?.cardsCompleted / 50}
-          color={theme === 'light' ? MD3Colors.primary60 : MD3Colors.primary70}
-        />
+        <ProgressBar progress={todaysProgress?.cardsCompleted} goal={50} />
       )}
       <Button title="Learn" onPress={() => navigation.navigate('Learn')} />
       <Button

@@ -4,8 +4,11 @@ import React, {
   useState,
   useLayoutEffect,
   useRef,
+  useContext,
 } from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import {ThemeContext} from '../context/ThemeContext';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {ActivityIndicator} from 'react-native-paper';
@@ -24,6 +27,7 @@ import ProgressBar from '../components/ProgressBar';
 import {fetchDictionary} from '../services/dictionaryService';
 
 const LearnPage = ({navigation}: LearnPageProps) => {
+  const {themeStyles} = useContext(ThemeContext);
   const [errors, setErrors] = useState<unknown>();
   const [currentFlashcard, setCurrentFlashcard] =
     useState<FlashcardType | null>(null);
@@ -62,19 +66,23 @@ const LearnPage = ({navigation}: LearnPageProps) => {
         dictionary = dictionary.filter(
           (card: FlashcardType) => !recentCardsIds.includes(card.id as never),
         );
+        console.log(dictionary);
 
         const randomIndex = Math.floor(Math.random() * dictionary.length);
         const randomCard = dictionary[randomIndex];
-        console.log(recentCardsRef.current);
         setCurrentFlashcard(randomCard);
         setProgress(randomCard.progress!);
 
-        const updatedLastCards: FlashcardType[] = [...recentCards, randomCard];
-        if (updatedLastCards.length > 1) {
-          updatedLastCards.shift(); // Remove the oldest flashcard
+        // filters recently selected cards
+        const updatedRecentCards: FlashcardType[] = [
+          ...recentCards,
+          randomCard,
+        ];
+        const halfDeck = Math.round(dictionary.length / 2);
+        if (updatedRecentCards.length > halfDeck) {
+          updatedRecentCards.shift(); // Remove the oldest flashcard
         }
-        recentCardsRef.current = updatedLastCards;
-        console.log(recentCardsRef.current);
+        recentCardsRef.current = updatedRecentCards;
       }
     } catch (error) {
       console.error('Failed to load dictionary:', error);
@@ -88,7 +96,6 @@ const LearnPage = ({navigation}: LearnPageProps) => {
 
   const handleSubmit: FlashcardComponent['handleSubmit'] = () => {
     const input = inputValue.trim().toLowerCase();
-    console.log(input);
     setInputValue(input);
 
     if (input === currentFlashcard?.targetPhrase.toLowerCase()) {
@@ -99,7 +106,6 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   };
 
   const handleCorrect = async () => {
-    console.log('correct');
     setCorrect(true);
 
     await setProgressData({
@@ -152,7 +158,6 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   };
 
   const handleIncorrect = () => {
-    console.log('incorrect');
     setInputValue('');
     setIncorrect(true);
     setProgress(0);
@@ -161,20 +166,34 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   const headerRight = useCallback(
     () =>
       todaysProgress && (
-        <ProgressBar progress={todaysProgress.cardsCompleted} />
+        <ProgressBar
+          style={styles.progressBar}
+          progress={todaysProgress.cardsCompleted}
+          goal={50}
+        />
       ),
     [todaysProgress],
   );
 
   useLayoutEffect(() => {
-    navigation.setOptions({title: '', headerRight});
+    navigation.setOptions({
+      title: '',
+      headerRight,
+      headerLeftContainerStyle: {
+        width: 0,
+      },
+    });
   }, [navigation, headerRight]);
 
   if (errors || !currentFlashcard) {
     return (
       <View style={styles.loaderContainer}>
         {errors ? (
-          <Text style={styles.error}>{`${errors}`}</Text>
+          <Text
+            style={[
+              themeStyles.textSecondary,
+              styles.error,
+            ]}>{`${errors}`}</Text>
         ) : (
           <ActivityIndicator size="large" />
         )}
@@ -202,6 +221,11 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
   },
+  progressBar: {
+    height: '100%',
+    paddingLeft: 16,
+    paddingRight: 32,
+  },
   error: {
     textAlign: 'center',
   },
@@ -210,28 +234,6 @@ const styles = StyleSheet.create({
     height: '100%',
     display: 'flex',
     paddingTop: 60,
-  },
-  progressContainer: {
-    height: '100%',
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingRight: 32,
-  },
-  progressBar: {
-    borderRadius: 2,
-    flexGrow: 1,
-    height: 4,
-    marginRight: 16,
-  },
-  progressBarProgress: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  progressText: {
-    fontWeight: '600',
   },
 });
 
