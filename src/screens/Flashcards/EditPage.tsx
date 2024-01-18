@@ -1,20 +1,23 @@
 import React, {useContext, useEffect, useState, useRef} from 'react';
 import {View, StyleSheet} from 'react-native';
-import Flashcard from '../components/Flashcard';
-import {TextInput, Button} from 'react-native';
+import Flashcard from '../../components/Flashcard/Flashcard';
+import {TextInput} from 'react-native';
+import {Button} from '../../components/elements';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {RouteProp} from '@react-navigation/native';
-import {RootStackParamList} from '../types/pages';
+import {RootStackParamList} from '../../types/pages';
 import {StackNavigationProp} from '@react-navigation/stack';
 
-import {ThemeContext} from '../context/ThemeContext';
+import {ThemeContext} from '../../context/ThemeContext';
 
-import {Flashcard as FlashcardType} from '../types';
+import {Flashcard as FlashcardType} from '../../types';
 import {MD3Colors} from 'react-native-paper';
 import {ScrollView} from 'react-native-gesture-handler';
 
-import {fetchDictionary} from '../services/dictionaryService';
+import {useDictionary} from '../../hooks/useDictionary';
+import {fetchDictionary} from '../../services/dictionaryService';
 import {v4 as uuidv4} from 'uuid';
 
 type EditPageProps = {
@@ -24,35 +27,46 @@ type EditPageProps = {
 
 const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
   const {themeStyles, theme} = useContext(ThemeContext);
-  const [targetPhrase, setTargetPhrase] = useState('');
-  const [targetSentence, setTargetSentence] = useState('');
+  const {selectedDictionary} = useDictionary(); // Using custom hook
+
+  const [targetPhraseInput, setTargetPhraseInput] = useState('');
+  const [targetSentenceInput, setTargetSentenceInput] = useState('');
   const [grammarClassesInput, setGrammarClassesInput] = useState('');
-  const [translatedPhrase, setTranslatedPhrase] = useState('');
-  const [translatedSentence, setTranslatedSentence] = useState('');
+  const [translatedPhraseInput, setTranslatedPhraseInput] = useState('');
+  const [translatedSentenceInput, setTranslatedSentenceInput] = useState('');
 
   const targetSentenceRef = useRef<TextInput>(null);
   const grammerClassesRef = useRef<TextInput>(null);
   const translatedPhraseRef = useRef<TextInput>(null);
   const translatedSentenceRef = useRef<TextInput>(null);
 
+  const targetPhrase = targetPhraseInput.trim();
+  const targetSentence = targetSentenceInput.trim();
+  const grammarClasses = grammarClassesInput
+    .split(',')
+    .map((item: String) => item.trim());
+  const translatedPhrase = translatedPhraseInput.trim();
+  const translatedSentence = translatedSentenceInput.trim();
+
   useEffect(() => {
     if (route.params?.flashcard) {
       const {flashcard} = route.params;
-      setTargetPhrase(flashcard.targetPhrase);
-      setTargetSentence(flashcard.targetSentence);
+      setTargetPhraseInput(flashcard.targetPhrase);
+      setTargetSentenceInput(flashcard.targetSentence);
       setGrammarClassesInput(flashcard.grammarClasses.join(', '));
-      setTranslatedPhrase(flashcard.translatedPhrase);
-      setTranslatedSentence(flashcard.translatedSentence);
+      setTranslatedPhraseInput(flashcard.translatedPhrase);
+      setTranslatedSentenceInput(flashcard.translatedSentence);
     }
   }, [route.params]);
 
-  const grammarClassesArray = grammarClassesInput
-    .split(',')
-    .map((item: String) => item.trim());
-
   const handleSave = async () => {
+    if (!selectedDictionary) {
+      navigation.navigate('Dictionaries');
+      return;
+    }
+
     try {
-      let dictionary = await fetchDictionary();
+      let dictionary = await fetchDictionary(selectedDictionary);
 
       if (dictionary) {
         // storeDictionary(dictionary);
@@ -60,7 +74,7 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
           id: uuidv4(),
           targetPhrase,
           targetSentence,
-          grammarClasses: grammarClassesArray,
+          grammarClasses,
           translatedPhrase,
           translatedSentence,
         };
@@ -69,8 +83,7 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
 
         if (route.params?.flashcard) {
           const index = dictionary.findIndex(
-            (item: FlashcardType) =>
-              item.targetPhrase === route.params.flashcard?.targetPhrase,
+            (item: FlashcardType) => item.id === route.params.flashcard?.id,
           );
 
           if (index !== -1) {
@@ -83,7 +96,10 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
           dictionary.push({...flashcardData, progress: 0} as never); // Add new flashcard
         }
 
-        await AsyncStorage.setItem('dictionary', JSON.stringify(dictionary));
+        await AsyncStorage.setItem(
+          selectedDictionary,
+          JSON.stringify(dictionary),
+        );
         // Navigate to the details page of the newly saved or updated flashcard
         navigation.navigate('Dictionary');
       }
@@ -99,7 +115,7 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
     id: route.params?.flashcard?.id || 'temp-id',
     targetPhrase,
     targetSentence,
-    grammarClasses: grammarClassesArray,
+    grammarClasses,
     translatedPhrase,
     translatedSentence,
     progress: 0,
@@ -110,11 +126,10 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
       <View style={styles.container}>
         <Flashcard flashcard={flashcard} autoFocus={false} />
 
-        {/* Input Fields */}
         <TextInput
           style={[themeStyles.input, styles.input]}
-          onChangeText={setTargetPhrase}
-          value={targetPhrase}
+          onChangeText={setTargetPhraseInput}
+          value={targetPhraseInput}
           placeholder="Target Phrase"
           placeholderTextColor={placeholderTextColor}
           returnKeyType="next"
@@ -123,8 +138,8 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
         <TextInput
           ref={targetSentenceRef}
           style={[themeStyles.input, styles.input]}
-          onChangeText={setTargetSentence}
-          value={targetSentence}
+          onChangeText={setTargetSentenceInput}
+          value={targetSentenceInput}
           placeholder="Target Sentence"
           placeholderTextColor={placeholderTextColor}
           returnKeyType="next"
@@ -143,8 +158,8 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
         <TextInput
           ref={translatedPhraseRef}
           style={[themeStyles.input, styles.input]}
-          onChangeText={setTranslatedPhrase}
-          value={translatedPhrase}
+          onChangeText={setTranslatedPhraseInput}
+          value={translatedPhraseInput}
           placeholder="Translated Phrase"
           placeholderTextColor={placeholderTextColor}
           returnKeyType="next"
@@ -153,16 +168,15 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
         <TextInput
           ref={translatedSentenceRef}
           style={[themeStyles.input, styles.input]}
-          onChangeText={setTranslatedSentence}
-          value={translatedSentence}
+          onChangeText={setTranslatedSentenceInput}
+          value={translatedSentenceInput}
           placeholder="Translated Sentence"
           placeholderTextColor={placeholderTextColor}
           returnKeyType="done"
         />
 
-        {/* Save Button */}
         <View style={styles.button}>
-          <Button title="Save" onPress={handleSave} />
+          <Button title="Save" onPress={handleSave} fullWidth />
         </View>
       </View>
     </ScrollView>
@@ -175,7 +189,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 5,
     padding: 10,
     marginVertical: 5,
   },

@@ -19,12 +19,13 @@ import {
   Progress,
   LearnPageProps,
 } from '../types';
-import Flashcard from '../components/Flashcard';
+import Flashcard from '../components/Flashcard/Flashcard';
 
 import {useProgress} from '../hooks/useProgress';
-import ProgressBar from '../components/ProgressBar';
+import {ProgressBar, Button} from '../components/elements';
 
 import {fetchDictionary} from '../services/dictionaryService';
+import {useDictionary} from '../hooks/useDictionary';
 
 const LearnPage = ({navigation}: LearnPageProps) => {
   const {themeStyles} = useContext(ThemeContext);
@@ -39,6 +40,8 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   const {fetchProgressData, setProgressData} = useProgress();
   const [todaysProgress, setTodaysProgress] = useState<Progress>();
 
+  const {selectedDictionary} = useDictionary(); // Using custom hook
+
   const recentCardsRef = useRef<FlashcardType[]>([]);
 
   useEffect(() => {
@@ -51,22 +54,26 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   }, [fetchProgressData]);
 
   const selectCard = useCallback(async () => {
+    if (!selectedDictionary) {
+      navigation.navigate('Dictionaries');
+      return;
+    }
+
     try {
-      let dictionary = await fetchDictionary();
+      let dictionary = await fetchDictionary(selectedDictionary);
 
       if (dictionary) {
-        if (!dictionary.length) {
-          setErrors('No flashcards found');
-          return false;
-        }
-
         const recentCards = recentCardsRef.current;
         const recentCardsIds = recentCardsRef.current.map(card => card.id);
 
         dictionary = dictionary.filter(
           (card: FlashcardType) => !recentCardsIds.includes(card.id as never),
         );
-        console.log(dictionary);
+
+        if (!dictionary.length) {
+          setErrors('No flashcards found');
+          return false;
+        }
 
         const randomIndex = Math.floor(Math.random() * dictionary.length);
         const randomCard = dictionary[randomIndex];
@@ -88,7 +95,7 @@ const LearnPage = ({navigation}: LearnPageProps) => {
       console.error('Failed to load dictionary:', error);
       setErrors(error);
     }
-  }, []);
+  }, [navigation, selectedDictionary]);
 
   useEffect(() => {
     selectCard();
@@ -124,7 +131,7 @@ const LearnPage = ({navigation}: LearnPageProps) => {
     if (currentFlashcard) {
       try {
         // Fetch the current dictionary from AsyncStorage
-        let dictionary = await fetchDictionary();
+        let dictionary = await fetchDictionary('dictionary');
 
         if (dictionary) {
           if (!dictionary.length) {
@@ -203,28 +210,39 @@ const LearnPage = ({navigation}: LearnPageProps) => {
 
   return (
     <View style={styles.container}>
-      <Text>{`${currentFlashcard}`}</Text>
-
-      <Flashcard
-        flashcard={{...currentFlashcard, progress}}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        handleSubmit={handleSubmit}
-        correct={correct}
-        incorrect={incorrect}
-      />
+      <View style={styles.cardContainer}>
+        <Flashcard
+          flashcard={{...currentFlashcard, progress}}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          handleSubmit={handleSubmit}
+          correct={correct}
+          incorrect={incorrect}
+        />
+      </View>
+      <View style={[themeStyles.backgroundPrimary, styles.toolbar]}>
+        <Button
+          title="Enter"
+          onPress={handleSubmit}
+          style={styles.enterButton}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  cardContainer: {
     padding: 16,
   },
   progressBar: {
     height: '100%',
-    paddingLeft: 16,
-    paddingRight: 32,
+    paddingHorizontal: 16,
   },
   error: {
     textAlign: 'center',
@@ -234,6 +252,19 @@ const styles = StyleSheet.create({
     height: '100%',
     display: 'flex',
     paddingTop: 60,
+  },
+  toolbar: {
+    // height: 34,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    height: 'auto',
+    display: 'flex',
+    // alignItems: 'flex-end',
+    // width: '100%',
+  },
+  enterButton: {
+    alignSelf: 'flex-end',
+    // width: '100%',
   },
 });
 

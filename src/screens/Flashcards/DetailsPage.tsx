@@ -1,15 +1,16 @@
 import React from 'react';
-import {View, Button, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
+import {Button} from '../../components/elements';
 
-import {RootStackParamList} from '../types/pages';
+import {RootStackParamList} from '../../types/pages';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// import {ThemeContext} from '../context/ThemeContext';
+import Flashcard from '../../components/Flashcard/Flashcard';
+import {Flashcard as FlashcardType} from '../../types';
 
-import Flashcard from '../components/Flashcard';
-import {Flashcard as FlashcardType} from '../types';
+import {ThemeContext} from '../../context/ThemeContext';
 
 type DetailsPageProps = {
   route: RouteProp<RootStackParamList, 'Details'>;
@@ -18,6 +19,7 @@ type DetailsPageProps = {
 
 const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
   const {flashcard} = route.params;
+  const {themeStyles} = React.useContext(ThemeContext);
 
   const handleEdit = () => {
     navigation.navigate('Edit', {flashcard});
@@ -30,7 +32,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
 
       // Filter out the flashcard to delete
       const updatedDictionary = dictionary.filter(
-        (item: FlashcardType) => item.targetPhrase !== flashcard.targetPhrase,
+        (item: FlashcardType) => item.id !== flashcard.id,
       );
 
       // Save the updated dictionary
@@ -49,11 +51,13 @@ const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Flashcard flashcard={flashcard} autoFocus={false} incorrect />
+      <View style={styles.innerContainer}>
+        <Flashcard flashcard={flashcard} autoFocus={false} incorrect />
+      </View>
       {/* Display other details of the flashcard */}
-      <View style={styles.buttons}>
-        <Button title="Edit" onPress={handleEdit} />
-        <Button title="Delete" onPress={handleDelete} />
+      <View style={[themeStyles.backgroundPrimary, styles.tools]}>
+        <Button title="Edit" onPress={handleEdit} fullWidth />
+        <Button title="Delete" onPress={handleDelete} fullWidth />
       </View>
     </View>
   );
@@ -62,11 +66,15 @@ const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'space-between',
+  },
+  innerContainer: {
     padding: 16,
   },
-  buttons: {
+  tools: {
     display: 'flex',
-    gap: 10,
+    gap: 8,
+    padding: 16,
   },
 });
 

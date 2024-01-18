@@ -60,6 +60,9 @@ const lightThemeStyles = StyleSheet.create({
   backgroundTertiary: {
     backgroundColor: MD3Colors.primary60,
   },
+  borderTertiary: {
+    borderColor: MD3Colors.primary60,
+  },
   bar: {
     backgroundColor: MD3Colors.neutral70,
   },
@@ -68,8 +71,12 @@ const lightThemeStyles = StyleSheet.create({
     backgroundColor: '#00968840',
   },
   input: {
+    backgroundColor: MD3Colors.neutral100,
     color: MD3Colors.neutral0,
     borderColor: MD3Colors.neutral70,
+  },
+  tintColour: {
+    tintColor: MD3Colors.neutral20,
   },
 });
 
@@ -96,6 +103,9 @@ const darkThemeStyles = StyleSheet.create({
   backgroundTertiary: {
     backgroundColor: MD3Colors.primary70,
   },
+  borderTertiary: {
+    borderColor: MD3Colors.primary70,
+  },
   bar: {
     backgroundColor: MD3Colors.neutral30,
   },
@@ -104,8 +114,12 @@ const darkThemeStyles = StyleSheet.create({
     backgroundColor: '#81c78440',
   },
   input: {
+    backgroundColor: MD3Colors.neutral0,
     color: MD3Colors.neutral100,
     borderColor: MD3Colors.neutral30,
+  },
+  tintColour: {
+    tintColor: MD3Colors.neutral80,
   },
 });
 

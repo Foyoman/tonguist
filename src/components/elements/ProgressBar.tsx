@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import {StyleSheet, View, Text, StyleProp, ViewStyle} from 'react-native';
-import {ThemeContext} from '../context/ThemeContext';
+import {ThemeContext} from '../../context/ThemeContext';
 
 interface ProgressBarProps {
   progress: number;
@@ -8,7 +8,7 @@ interface ProgressBarProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const ProgressBar = ({progress, goal, style}: ProgressBarProps) => {
+export const ProgressBar = ({progress, goal, style}: ProgressBarProps) => {
   const {themeStyles} = useContext(ThemeContext);
   const percentage = Math.min((progress / goal) * 100, 100);
 
@@ -52,5 +52,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-export default ProgressBar;
