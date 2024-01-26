@@ -180,9 +180,9 @@ const Flashcard: React.FC<FlashcardComponent> = ({
         {flashcard.translatedSentence && (
           <View style={[styles.inlineWrap, styles.translatedSentenceContainer]}>
             {translatedBeforeText}
-            {flashcard.translatedSentence
-              .toLowerCase()
-              .includes(flashcard.translatedPhrase.toLowerCase()) && (
+            {new RegExp(`\\b${flashcard.translatedPhrase}\\b`, 'i').test(
+              flashcard.translatedSentence,
+            ) && (
               <View style={styles.inlineNoWrap}>
                 <Text
                   style={[
