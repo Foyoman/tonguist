@@ -68,14 +68,14 @@ export const removeDictionary = async (name: string): Promise<void> => {
   }
 };
 
-export const fetchGoal = async () => {
+export const fetchGoal = async (dictionary?: string) => {
+  if (!dictionary) {
+    return;
+  }
+
   try {
-    const storedGoal = await AsyncStorage.getItem('goal');
-    if (!storedGoal) {
-      const defaultGoal = 50;
-      await AsyncStorage.setItem('goal', JSON.stringify(defaultGoal));
-      return defaultGoal;
-    } else {
+    const storedGoal = await AsyncStorage.getItem(`${dictionary}-goal`);
+    if (storedGoal) {
       return JSON.parse(storedGoal);
     }
   } catch (error) {
@@ -83,9 +83,13 @@ export const fetchGoal = async () => {
   }
 };
 
-export const setGoal = async (goal: number) => {
+export const setGoal = async (goal: number, dictionary?: string) => {
+  if (!dictionary) {
+    return;
+  }
+
   try {
-    await AsyncStorage.setItem('goal', JSON.stringify(goal));
+    await AsyncStorage.setItem(`${dictionary}-goal`, JSON.stringify(goal));
   } catch (error) {
     console.error('Error setting goal:', error);
   }

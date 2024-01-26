@@ -1,4 +1,10 @@
-import React, {createContext, useState, useEffect, ReactNode} from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from 'react';
 import * as appStorage from '../utils/appStorage';
 
 type AppContextType = {
@@ -7,6 +13,7 @@ type AppContextType = {
   addDictionary: (name: string) => Promise<void>;
   removeDictionary: (name: string) => Promise<void>;
   goal: number;
+  fetchGoal: () => Promise<number | void>;
   setGoal: (goal: number) => Promise<void>;
 };
 
@@ -16,6 +23,7 @@ const defaultValue: AppContextType = {
   addDictionary: appStorage.addDictionary,
   removeDictionary: appStorage.removeDictionary,
   goal: 50,
+  fetchGoal: appStorage.fetchGoal,
   setGoal: appStorage.setGoal, // Function to set goal in storage
 };
 
@@ -46,25 +54,45 @@ export const AppProvider = ({children}: AppProviderProps) => {
     setSelectedDictionary('');
   };
 
+  const fetchGoal = useCallback(async () => {
+    if (!selectedDictionary) {
+      return;
+    }
+
+    const storedGoal = await appStorage.fetchGoal(selectedDictionary);
+    if (!storedGoal) {
+      const defaultGoal = 50;
+      await appStorage.setGoal(defaultGoal, selectedDictionary);
+      return defaultGoal;
+    } else {
+      setGoalState(storedGoal);
+      return storedGoal;
+    }
+  }, [selectedDictionary]);
+
   const setGoal = async (newGoal: number) => {
-    await appStorage.setGoal(newGoal); // Save goal to storage
+    if (!selectedDictionary) {
+      return;
+    }
+
+    await appStorage.setGoal(newGoal, selectedDictionary); // Save goal to storage
     setGoalState(newGoal); // Update local state
   };
 
   useEffect(() => {
     const init = async () => {
       const storedSelectedDictionary = await appStorage.getSelectedDictionary();
-      const storedGoal = await appStorage.fetchGoal(); // Get goal from storage
+      const storedGoal = await fetchGoal(); // Get goal from storage
 
       if (storedSelectedDictionary) {
         setSelectedDictionaryState(storedSelectedDictionary);
       }
-      if (storedGoal !== null) {
+      if (storedGoal) {
         setGoalState(storedGoal); // Initialize goal state
       }
     };
     init();
-  }, []);
+  }, [fetchGoal]);
 
   return (
     <AppContext.Provider
@@ -74,6 +102,7 @@ export const AppProvider = ({children}: AppProviderProps) => {
         addDictionary,
         removeDictionary,
         goal,
+        fetchGoal,
         setGoal,
       }}>
       {children}

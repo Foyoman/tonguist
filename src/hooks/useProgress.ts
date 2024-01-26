@@ -1,12 +1,13 @@
 // hooks/useProgress.js
-import {useCallback} from 'react';
+import {useCallback, useContext} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Progress} from '../types';
 import {useDictionary} from './useDictionary';
-import * as appStorage from '../utils/appStorage';
+import {AppContext} from '../context/AppContext';
 
 export const useProgress = () => {
   const {selectedDictionary} = useDictionary();
+  const {fetchGoal} = useContext(AppContext);
 
   const getTodayDateString = () => {
     const today = new Date();
@@ -184,7 +185,11 @@ export const useProgress = () => {
       let progressData: Progress[] = storedData ? JSON.parse(storedData) : [];
 
       // Get user's goal
-      const goal = await appStorage.fetchGoal();
+      const goal = await fetchGoal();
+
+      if (!goal) {
+        return 0;
+      }
 
       // Sort progressData by date in descending order
       if (!progressData.length) {
@@ -223,7 +228,7 @@ export const useProgress = () => {
       console.error('Error calculating streak:', error);
       return 0;
     }
-  }, [selectedDictionary]);
+  }, [fetchGoal, selectedDictionary]);
 
   return {
     getTodayDateString,
