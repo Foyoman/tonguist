@@ -8,6 +8,7 @@ export type RootStackParamList = {
   Learn: undefined; // No parameters expected for Learn
   Dictionary: undefined; // No parameters expected for Dictionary
   Dictionaries: undefined;
+  Progress: undefined;
 };
 
 type LearnPageNavigationProp = StackNavigationProp<RootStackParamList, 'Learn'>;

@@ -15,6 +15,7 @@ import EditPage from '../screens/Flashcards/EditPage';
 
 // Define the types for navigation parameters for each screen
 import {RootStackParamList} from '../types';
+import ProgressPage from '../screens/ProgressPage';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -31,6 +32,7 @@ const AppNavigator = () => {
         <Stack.Screen name="Dictionary" component={DictionaryPage} />
         <Stack.Screen name="Details" component={DetailsPage} />
         <Stack.Screen name="Edit" component={EditPage} />
+        <Stack.Screen name="Progress" component={ProgressPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

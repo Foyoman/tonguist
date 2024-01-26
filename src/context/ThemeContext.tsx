@@ -60,6 +60,9 @@ const lightThemeStyles = StyleSheet.create({
   backgroundTertiary: {
     backgroundColor: MD3Colors.primary60,
   },
+  borderNeutral: {
+    borderColor: MD3Colors.neutral100,
+  },
   borderTertiary: {
     borderColor: MD3Colors.primary60,
   },
@@ -77,6 +80,10 @@ const lightThemeStyles = StyleSheet.create({
   },
   tintColour: {
     tintColor: MD3Colors.neutral20,
+  },
+  calendar: {
+    backgroundColor: MD3Colors.neutral90,
+    color: MD3Colors.neutral20,
   },
 });
 
@@ -103,6 +110,9 @@ const darkThemeStyles = StyleSheet.create({
   backgroundTertiary: {
     backgroundColor: MD3Colors.primary70,
   },
+  borderNeutral: {
+    borderColor: MD3Colors.neutral0,
+  },
   borderTertiary: {
     borderColor: MD3Colors.primary70,
   },
@@ -120,6 +130,10 @@ const darkThemeStyles = StyleSheet.create({
   },
   tintColour: {
     tintColor: MD3Colors.neutral80,
+  },
+  calendar: {
+    backgroundColor: MD3Colors.neutral10,
+    color: MD3Colors.neutral80,
   },
 });
 

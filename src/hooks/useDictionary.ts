@@ -1,7 +1,6 @@
-// /src/hooks/useDictionary.ts
 import {useContext} from 'react';
-import {DictionaryContext} from '../context/DictionaryContext';
+import {AppContext} from '../context/AppContext';
 
 export const useDictionary = () => {
-  return useContext(DictionaryContext);
+  return useContext(AppContext);
 };

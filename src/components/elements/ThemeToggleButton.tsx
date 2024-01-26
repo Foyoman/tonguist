@@ -1,27 +1,23 @@
 import React from 'react';
-import {TouchableOpacity, StyleSheet} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon library
+import {TouchableOpacity, StyleProp, ViewStyle} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 type ThemeToggleButtonProps = {
   toggleTheme: () => void;
   isDarkMode: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 export const ThemeToggleButton = ({
   toggleTheme,
   isDarkMode,
+  style,
 }: ThemeToggleButtonProps) => {
-  const iconName = isDarkMode ? 'sun-o' : 'moon-o'; // Example icons for light/dark
+  const iconName = isDarkMode ? 'sun-o' : 'moon-o';
 
   return (
-    <TouchableOpacity style={styles.toggleButton} onPress={toggleTheme}>
+    <TouchableOpacity style={style} onPress={toggleTheme}>
       <Icon name={iconName} size={24} color={isDarkMode ? 'white' : 'black'} />
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  toggleButton: {
-    marginRight: 12,
-  },
-});

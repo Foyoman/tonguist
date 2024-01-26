@@ -2,15 +2,15 @@ import React from 'react';
 import AppNavigator from './navigation/AppNavigator';
 import {ThemeProvider} from './context/ThemeContext';
 import {PaperProvider} from 'react-native-paper';
-import {DictionaryProvider} from './context/DictionaryContext';
+import {AppProvider} from './context/AppContext';
 
 function App(): React.JSX.Element {
   return (
     <ThemeProvider>
       <PaperProvider>
-        <DictionaryProvider>
+        <AppProvider>
           <AppNavigator />
-        </DictionaryProvider>
+        </AppProvider>
       </PaperProvider>
     </ThemeProvider>
   );

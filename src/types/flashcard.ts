@@ -5,7 +5,7 @@ export interface Flashcard {
   grammarClasses: string[];
   translatedPhrase: string;
   translatedSentence: string;
-  progress: number;
+  progress?: number;
 }
 
 export interface FlashcardComponent {

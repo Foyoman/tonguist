@@ -1,24 +1,9 @@
 import React, {useContext} from 'react';
-import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ThemeContext} from '../../context/ThemeContext';
 import {MD3Colors} from 'react-native-paper';
 
-interface ButtonProps {
-  title?: string;
-  onPress?: () => any;
-  children?: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
-  fullWidth?: boolean;
-  outline?: boolean;
-  disabled?: boolean;
-}
+import {ButtonProps} from '../../types/button';
 
 export const Button = ({
   title,
@@ -37,7 +22,10 @@ export const Button = ({
         style={[
           outline
             ? {...themeStyles.borderTertiary, ...styles.outline}
-            : themeStyles.backgroundTertiary,
+            : {
+                ...themeStyles.backgroundTertiary,
+                ...themeStyles.borderTertiary,
+              },
           disabled && styles.disabled,
           styles.container,
           style,
@@ -60,9 +48,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingVertical: 4,
     paddingHorizontal: 8,
+    borderWidth: 1,
   },
   outline: {
-    borderWidth: 1,
     backgroundColor: 'transparent',
   },
   disabled: {

@@ -1,3 +1,5 @@
 export * from './Button';
-export * from './ProgressBar';
 export * from './ThemeToggleButton';
+export * from './Modal';
+export * from './DeleteButton';
+export * from './SortButton';

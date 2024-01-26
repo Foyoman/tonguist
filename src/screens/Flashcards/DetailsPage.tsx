@@ -2,15 +2,17 @@ import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
-import {Button} from '../../components/elements';
 
 import {RootStackParamList} from '../../types/pages';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Flashcard from '../../components/Flashcard/Flashcard';
 import {Flashcard as FlashcardType} from '../../types';
 
-import {ThemeContext} from '../../context/ThemeContext';
+import ToolsLayout from '../../components/layout/ToolsLayout';
+
+import {useDictionary} from '../../hooks/useDictionary';
+import {fetchDictionary} from '../../services/dictionaryService';
+import {saveDictionary} from '../../utils/appStorage';
 
 type DetailsPageProps = {
   route: RouteProp<RootStackParamList, 'Details'>;
@@ -19,7 +21,7 @@ type DetailsPageProps = {
 
 const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
   const {flashcard} = route.params;
-  const {themeStyles} = React.useContext(ThemeContext);
+  const {selectedDictionary} = useDictionary();
 
   const handleEdit = () => {
     navigation.navigate('Edit', {flashcard});
@@ -27,8 +29,13 @@ const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
 
   const handleDelete = async () => {
     try {
-      const existingDictionary = await AsyncStorage.getItem('dictionary');
-      let dictionary = existingDictionary ? JSON.parse(existingDictionary) : [];
+      if (!selectedDictionary) {
+        navigation.navigate('Home');
+        return;
+      }
+
+      const existingDictionary = await fetchDictionary(selectedDictionary);
+      let dictionary = existingDictionary ? existingDictionary : [];
 
       // Filter out the flashcard to delete
       const updatedDictionary = dictionary.filter(
@@ -36,10 +43,7 @@ const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
       );
 
       // Save the updated dictionary
-      await AsyncStorage.setItem(
-        'dictionary',
-        JSON.stringify(updatedDictionary),
-      );
+      saveDictionary(selectedDictionary, updatedDictionary);
 
       // Navigate back to the Dictionary page
       navigation.navigate('Dictionary');
@@ -50,16 +54,15 @@ const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ToolsLayout
+      buttons={[
+        {title: 'Edit', onPress: handleEdit},
+        {title: 'Delete', onPress: handleDelete, outline: true},
+      ]}>
       <View style={styles.innerContainer}>
         <Flashcard flashcard={flashcard} autoFocus={false} incorrect />
       </View>
-      {/* Display other details of the flashcard */}
-      <View style={[themeStyles.backgroundPrimary, styles.tools]}>
-        <Button title="Edit" onPress={handleEdit} fullWidth />
-        <Button title="Delete" onPress={handleDelete} fullWidth />
-      </View>
-    </View>
+    </ToolsLayout>
   );
 };
 

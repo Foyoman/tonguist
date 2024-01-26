@@ -6,15 +6,27 @@ interface ProgressBarProps {
   progress: number;
   goal: number;
   style?: StyleProp<ViewStyle>;
+  contained?: boolean;
 }
 
-export const ProgressBar = ({progress, goal, style}: ProgressBarProps) => {
+export const ProgressBar = ({
+  progress,
+  goal,
+  style,
+  contained,
+}: ProgressBarProps) => {
   const {themeStyles} = useContext(ThemeContext);
   const percentage = Math.min((progress / goal) * 100, 100);
 
   return (
     <View style={[styles.progressContainer, style]}>
-      <View style={[themeStyles.backgroundPrimary, styles.progressBar]}>
+      <View
+        style={[
+          contained
+            ? themeStyles.backgroundSecondary
+            : themeStyles.backgroundPrimary,
+          styles.progressBar,
+        ]}>
         <View
           style={[
             themeStyles.backgroundTertiary,

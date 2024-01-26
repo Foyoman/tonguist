@@ -12,6 +12,7 @@ import {ThemeContext} from '../../context/ThemeContext';
 import {MD3Colors} from 'react-native-paper';
 
 import {FlashcardComponent} from '../../types';
+import {extractTargetPhrase} from '../../utils/textUtils';
 
 const Flashcard: React.FC<FlashcardComponent> = ({
   flashcard,
@@ -28,12 +29,23 @@ const Flashcard: React.FC<FlashcardComponent> = ({
   const grammarClassesStr = flashcard.grammarClasses.join(', ');
   const inputRef = useRef<TextInput>(null);
 
+  const ogTargetPhrase = extractTargetPhrase(
+    flashcard.targetSentence,
+    flashcard.targetPhrase,
+  );
+
+  const ogTranslatedPhrase = extractTargetPhrase(
+    flashcard.translatedSentence,
+    flashcard.translatedPhrase,
+  );
+
   const splitTextSentence = (
     phrase: string,
     sentence: string,
     styles?: TextStyle[],
   ) => {
-    const splitSentence = sentence.split(phrase);
+    const phraseRegex = new RegExp(`\\b${phrase}\\b`, 'i');
+    const splitSentence = sentence.split(phraseRegex);
     const beforeTextArr = splitSentence[0]?.match(/\S+|\s/g) as string[];
     const afterTextArr = splitSentence[1]?.match(/\S+|\s/g) as string[];
 
@@ -75,10 +87,11 @@ const Flashcard: React.FC<FlashcardComponent> = ({
 
   const progressBars = [];
   for (let i = 0; i < progressGoal; i++) {
-    const barStyle =
-      i <= flashcard.progress - 1
+    const barStyle = flashcard.progress
+      ? i <= flashcard.progress - 1
         ? themeStyles.backgroundTertiary
-        : themeStyles.bar;
+        : themeStyles.bar
+      : themeStyles.bar;
 
     progressBars.push(<View key={i} style={[barStyle, styles.bar]} />);
   }
@@ -132,7 +145,7 @@ const Flashcard: React.FC<FlashcardComponent> = ({
               autoCapitalize="none"
               spellCheck={false}
               ref={inputRef}
-              placeholder={incorrect ? flashcard.targetPhrase : ''}
+              placeholder={incorrect ? ogTargetPhrase : ''}
               placeholderTextColor={
                 theme === 'light' ? MD3Colors.neutral30 : MD3Colors.neutral70
               }
@@ -167,22 +180,29 @@ const Flashcard: React.FC<FlashcardComponent> = ({
         {flashcard.translatedSentence && (
           <View style={[styles.inlineWrap, styles.translatedSentenceContainer]}>
             {translatedBeforeText}
-            <View style={styles.inlineNoWrap}>
-              <Text
-                style={[
-                  themeStyles.textPrimary,
-                  styles.translatedSentence,
-                  styles.translatedSentencePhrase,
-                ]}>
-                {flashcard.translatedPhrase}
-              </Text>
-              {translatedFollowingPunc && (
+            {flashcard.translatedSentence
+              .toLowerCase()
+              .includes(flashcard.translatedPhrase.toLowerCase()) && (
+              <View style={styles.inlineNoWrap}>
                 <Text
-                  style={[themeStyles.textPrimary, styles.translatedSentence]}>
-                  {translatedFollowingPunc}
+                  style={[
+                    themeStyles.textPrimary,
+                    styles.translatedSentence,
+                    styles.translatedSentencePhrase,
+                  ]}>
+                  {ogTranslatedPhrase}
                 </Text>
-              )}
-            </View>
+                {translatedFollowingPunc && (
+                  <Text
+                    style={[
+                      themeStyles.textPrimary,
+                      styles.translatedSentence,
+                    ]}>
+                    {translatedFollowingPunc}
+                  </Text>
+                )}
+              </View>
+            )}
             {translatedAfterText}
           </View>
         )}
@@ -196,7 +216,7 @@ const Flashcard: React.FC<FlashcardComponent> = ({
           const {width} = event.nativeEvent.layout;
           setInputWidth(width);
         }}>
-        {flashcard.targetPhrase}
+        {ogTargetPhrase}
       </TextInput>
     </View>
   );

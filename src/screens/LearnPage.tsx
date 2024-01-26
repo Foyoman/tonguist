@@ -1,3 +1,4 @@
+// native
 import React, {
   useCallback,
   useEffect,
@@ -7,27 +8,38 @@ import React, {
   useContext,
 } from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+
+// context
 import {ThemeContext} from '../context/ThemeContext';
+import {AppContext} from '../context/AppContext';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+// components
+import Flashcard from '../components/Flashcard/Flashcard';
 import {ActivityIndicator} from 'react-native-paper';
+import {Button} from '../components/elements';
 
+// utils
+import {extractTargetPhrase} from '../utils/textUtils';
+
+// types
 import {
   FlashcardComponent,
   Flashcard as FlashcardType,
   Progress,
   LearnPageProps,
 } from '../types';
-import Flashcard from '../components/Flashcard/Flashcard';
 
+// progress
 import {useProgress} from '../hooks/useProgress';
-import {ProgressBar, Button} from '../components/elements';
+import {ProgressBar} from '../components/Progress';
 
+// dictionary
 import {fetchDictionary} from '../services/dictionaryService';
 import {useDictionary} from '../hooks/useDictionary';
+import {saveDictionary} from '../utils/appStorage';
 
 const LearnPage = ({navigation}: LearnPageProps) => {
+  const {goal} = useContext(AppContext);
   const {themeStyles} = useContext(ThemeContext);
   const [errors, setErrors] = useState<unknown>();
   const [currentFlashcard, setCurrentFlashcard] =
@@ -37,7 +49,7 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   const [incorrect, setIncorrect] = useState(false);
   const [progress, setProgress] = useState<number>(0);
 
-  const {fetchProgressData, setProgressData} = useProgress();
+  const {fetchTodaysProgress, setProgressData} = useProgress();
   const [todaysProgress, setTodaysProgress] = useState<Progress>();
 
   const {selectedDictionary} = useDictionary(); // Using custom hook
@@ -46,12 +58,16 @@ const LearnPage = ({navigation}: LearnPageProps) => {
 
   useEffect(() => {
     const initializeProgress = async () => {
-      const progressData = await fetchProgressData();
-      setTodaysProgress(progressData);
+      const progressData = await fetchTodaysProgress();
+      if (progressData) {
+        setTodaysProgress(progressData);
+      } else {
+        navigation.navigate('Home');
+      }
     };
 
     initializeProgress();
-  }, [fetchProgressData]);
+  }, [fetchTodaysProgress, navigation]);
 
   const selectCard = useCallback(async () => {
     if (!selectedDictionary) {
@@ -62,33 +78,35 @@ const LearnPage = ({navigation}: LearnPageProps) => {
     try {
       let dictionary = await fetchDictionary(selectedDictionary);
 
-      if (dictionary) {
-        const recentCards = recentCardsRef.current;
-        const recentCardsIds = recentCardsRef.current.map(card => card.id);
+      if (!dictionary || !dictionary.length) {
+        setErrors('No flashcards found');
+        return;
+      }
 
-        dictionary = dictionary.filter(
-          (card: FlashcardType) => !recentCardsIds.includes(card.id as never),
-        );
+      const recentCardsIds = new Set(
+        recentCardsRef.current.map(card => card.id),
+      );
 
-        if (!dictionary.length) {
-          setErrors('No flashcards found');
-          return false;
-        }
+      // remove recently shown cards from the dictionary
+      const filteredDictionary = dictionary.filter(
+        (card: FlashcardType) => !recentCardsIds.has(card.id),
+      );
 
-        const randomIndex = Math.floor(Math.random() * dictionary.length);
-        const randomCard = dictionary[randomIndex];
-        setCurrentFlashcard(randomCard);
-        setProgress(randomCard.progress!);
+      // select a random card from either the filtered or full dictionary
+      const randomIndex = Math.floor(Math.random() * filteredDictionary.length);
+      const selectedCard = filteredDictionary[randomIndex];
+      setCurrentFlashcard(selectedCard);
+      setProgress(selectedCard.progress ?? 0);
 
-        // filters recently selected cards
-        const updatedRecentCards: FlashcardType[] = [
-          ...recentCards,
-          randomCard,
-        ];
-        const halfDeck = Math.round(dictionary.length / 2);
-        if (updatedRecentCards.length > halfDeck) {
-          updatedRecentCards.shift(); // Remove the oldest flashcard
-        }
+      // filters recently selected cards
+      const updatedRecentCards: FlashcardType[] = [
+        ...recentCardsRef.current,
+        selectedCard,
+      ];
+      if (updatedRecentCards.length >= dictionary.length) {
+        // updatedRecentCards.shift(); // Remove the oldest flashcard
+        recentCardsRef.current = [selectedCard];
+      } else {
         recentCardsRef.current = updatedRecentCards;
       }
     } catch (error) {
@@ -102,8 +120,20 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   }, [selectCard]);
 
   const handleSubmit: FlashcardComponent['handleSubmit'] = () => {
+    if (correct) {
+      return;
+    }
+
     const input = inputValue.trim().toLowerCase();
-    setInputValue(input);
+    if (currentFlashcard) {
+      const ogTargetPhrase = extractTargetPhrase(
+        currentFlashcard?.targetSentence,
+        currentFlashcard?.targetPhrase,
+      );
+      setInputValue(ogTargetPhrase);
+    } else {
+      setInputValue(input);
+    }
 
     if (input === currentFlashcard?.targetPhrase.toLowerCase()) {
       handleCorrect();
@@ -115,40 +145,57 @@ const LearnPage = ({navigation}: LearnPageProps) => {
   const handleCorrect = async () => {
     setCorrect(true);
 
+    const updatedCardsCompleted = todaysProgress?.cardsCompleted
+      ? todaysProgress.cardsCompleted + 1
+      : 1;
+
+    let updatedCorrectAttempts = todaysProgress?.correctAttempts;
+    if (!incorrect) {
+      updatedCorrectAttempts = todaysProgress?.correctAttempts
+        ? todaysProgress.correctAttempts + 1
+        : 1;
+    }
     await setProgressData({
       ...todaysProgress,
-      cardsCompleted: todaysProgress?.cardsCompleted
-        ? todaysProgress?.cardsCompleted + 1
-        : 1,
+      cardsCompleted: updatedCardsCompleted,
+      correctAttempts: updatedCorrectAttempts,
     } as Progress);
-    const progressData = await fetchProgressData();
-    setTodaysProgress(progressData);
 
-    // if correct on first attempt
+    const progressData = await fetchTodaysProgress();
+    if (progressData) {
+      setTodaysProgress(progressData);
+    } else {
+      navigation.navigate('Home');
+    }
+
     const updatedProgress = progress + 1;
     setProgress(updatedProgress);
 
     if (currentFlashcard) {
       try {
-        // Fetch the current dictionary from AsyncStorage
-        let dictionary = await fetchDictionary('dictionary');
+        if (!selectedDictionary) {
+          navigation.navigate('Home');
+          return;
+        }
+
+        let dictionary = await fetchDictionary(selectedDictionary);
 
         if (dictionary) {
           if (!dictionary.length) {
             setErrors('No flashcards found');
-            return false;
+            return;
           }
 
           // Find the flashcard and update its progress
-          dictionary = dictionary.map((card: FlashcardType) => {
+          const updatedDictionary = dictionary.map((card: FlashcardType) => {
             if (card.id === currentFlashcard.id) {
               return {...card, progress: updatedProgress};
+            } else {
+              return card;
             }
-            return card;
           });
 
-          // Save the updated dictionary back to AsyncStorage
-          await AsyncStorage.setItem('dictionary', JSON.stringify(dictionary));
+          saveDictionary(selectedDictionary, updatedDictionary);
         }
       } catch (error) {
         console.error('Failed to update dictionary:', error);
@@ -176,10 +223,10 @@ const LearnPage = ({navigation}: LearnPageProps) => {
         <ProgressBar
           style={styles.progressBar}
           progress={todaysProgress.cardsCompleted}
-          goal={50}
+          goal={goal}
         />
       ),
-    [todaysProgress],
+    [todaysProgress, goal],
   );
 
   useLayoutEffect(() => {

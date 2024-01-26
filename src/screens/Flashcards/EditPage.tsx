@@ -4,8 +4,6 @@ import Flashcard from '../../components/Flashcard/Flashcard';
 import {TextInput} from 'react-native';
 import {Button} from '../../components/elements';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../../types/pages';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -19,6 +17,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {useDictionary} from '../../hooks/useDictionary';
 import {fetchDictionary} from '../../services/dictionaryService';
 import {v4 as uuidv4} from 'uuid';
+import {saveDictionary} from '../../utils/appStorage';
 
 type EditPageProps = {
   route: RouteProp<RootStackParamList, 'Edit'>;
@@ -96,10 +95,8 @@ const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
           dictionary.push({...flashcardData, progress: 0} as never); // Add new flashcard
         }
 
-        await AsyncStorage.setItem(
-          selectedDictionary,
-          JSON.stringify(dictionary),
-        );
+        saveDictionary(selectedDictionary, dictionary);
+
         // Navigate to the details page of the newly saved or updated flashcard
         navigation.navigate('Dictionary');
       }
@@ -190,8 +187,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderRadius: 5,
-    padding: 10,
     marginVertical: 5,
+
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    fontSize: 14,
+    textAlignVertical: 'center',
   },
   button: {
     marginTop: 5,
