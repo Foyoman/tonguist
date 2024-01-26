@@ -44,7 +44,7 @@ const Flashcard: React.FC<FlashcardComponent> = ({
     sentence: string,
     styles?: TextStyle[],
   ) => {
-    const phraseRegex = new RegExp(`\\b${phrase}\\b`, 'i');
+    const phraseRegex = new RegExp(`(^|\\s)${phrase}($|\\s)`, 'i');
     const splitSentence = sentence.split(phraseRegex);
     const beforeTextArr = splitSentence[0]?.match(/\S+|\s/g) as string[];
     const afterTextArr = splitSentence[1]?.match(/\S+|\s/g) as string[];
@@ -180,9 +180,10 @@ const Flashcard: React.FC<FlashcardComponent> = ({
         {flashcard.translatedSentence && (
           <View style={[styles.inlineWrap, styles.translatedSentenceContainer]}>
             {translatedBeforeText}
-            {new RegExp(`\\b${flashcard.translatedPhrase}\\b`, 'i').test(
-              flashcard.translatedSentence,
-            ) && (
+            {new RegExp(
+              `(^|\\s)${flashcard.translatedPhrase}($|\\s)`,
+              'i',
+            ).test(flashcard.translatedSentence) && (
               <View style={styles.inlineNoWrap}>
                 <Text
                   style={[
