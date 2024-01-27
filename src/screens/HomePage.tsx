@@ -1,5 +1,11 @@
 // native
-import React, {useCallback, useContext, useState, useLayoutEffect} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useState,
+  useLayoutEffect,
+  useEffect,
+} from 'react';
 import {useFocusEffect} from '@react-navigation/native';
 import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
 
@@ -156,12 +162,16 @@ const HomePage = ({navigation}: HomePageProps) => {
   const openGoalModal = () => setIsGoalModalVisible(true);
   const closeGoalModal = () => setIsGoalModalVisible(false);
 
-  const handleSaveGoal = async () => {
+  const handleSaveGoal = () => {
     closeGoalModal();
     setGoal(goalOption);
-    const updatedStreak = await calculateStreak();
-    setStreak(updatedStreak);
+    getStreak();
   };
+
+  // set goal option to updated goal whenever goal is updated
+  useEffect(() => {
+    setGoalOption(goal);
+  }, [goal]);
 
   if (loading) {
     return (
