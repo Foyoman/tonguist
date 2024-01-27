@@ -26,21 +26,14 @@ import {ActivityIndicator} from 'react-native-paper';
 
 const HomePage = ({navigation}: HomePageProps) => {
   const {themeStyles, theme, toggleTheme} = useContext(ThemeContext);
-  const {goal, setGoal} = useContext(AppContext);
   const isDarkMode = theme === 'dark';
 
   const [loading, setLoading] = useState(true);
-  const {selectedDictionary, setSelectedDictionary} = useDictionary();
-  const [todaysProgress, setTodaysProgress] = useState<Progress>();
 
+  const {goal, setGoal} = useContext(AppContext);
   const {fetchTodaysProgress, calculateStreak} = useProgress();
-  const [streak, setStreak] = useState(0);
 
   const [dictionaryDropdownOpen, setDictionaryDropdownOpen] = useState(false);
-  const [dictionaryOption, setDictionaryOption] = useState('');
-  const [dictionaryItems, setDictionaryItems] = useState([
-    {label: '', value: '', key: 0},
-  ]);
 
   const handleToggleTheme = useCallback(() => {
     setDictionaryDropdownOpen(false);
@@ -62,6 +55,9 @@ const HomePage = ({navigation}: HomePageProps) => {
     navigation.setOptions({headerRight});
   }, [navigation, headerRight]);
 
+  const [dictionaryItems, setDictionaryItems] = useState([
+    {label: '', value: '', key: 0},
+  ]);
   const loadDictionaries = useCallback(async () => {
     const dictionaries = await fetchDictionaryNames();
     if (dictionaries && dictionaries.length) {
@@ -80,6 +76,7 @@ const HomePage = ({navigation}: HomePageProps) => {
     }
   }, [navigation]);
 
+  const [todaysProgress, setTodaysProgress] = useState<Progress>();
   const loadProgress = useCallback(async () => {
     const progressData = await fetchTodaysProgress();
     if (progressData) {
@@ -89,6 +86,7 @@ const HomePage = ({navigation}: HomePageProps) => {
     }
   }, [fetchTodaysProgress, navigation]);
 
+  const {selectedDictionary, setSelectedDictionary} = useDictionary();
   const handleSelectDictionary = (dictionaryName: string | null) => {
     if (dictionaryName) {
       setSelectedDictionary(dictionaryName);
@@ -96,11 +94,13 @@ const HomePage = ({navigation}: HomePageProps) => {
     }
   };
 
+  const [streak, setStreak] = useState(0);
   const getStreak = useCallback(async () => {
     const calculatedStreak = await calculateStreak();
     setStreak(calculatedStreak);
   }, [calculateStreak]);
 
+  const [dictionaryOption, setDictionaryOption] = useState('');
   useFocusEffect(
     useCallback(() => {
       const loadAllData = async () => {
@@ -156,9 +156,11 @@ const HomePage = ({navigation}: HomePageProps) => {
   const openGoalModal = () => setIsGoalModalVisible(true);
   const closeGoalModal = () => setIsGoalModalVisible(false);
 
-  const handleSaveGoal = () => {
-    setGoal(goalOption);
+  const handleSaveGoal = async () => {
     closeGoalModal();
+    setGoal(goalOption);
+    const updatedStreak = await calculateStreak();
+    setStreak(updatedStreak);
   };
 
   if (loading) {
