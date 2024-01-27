@@ -196,20 +196,34 @@ export const useProgress = () => {
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
 
+      const today = new Date();
       let streak = 0;
-      let currentDate = new Date();
+      let checkDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      ); // Today with time set to 00:00:00
 
-      for (let i = progressData.length - 1; i >= 0; i--) {
-        const progressDate = new Date(progressData[i].date);
-        const timeDiff = currentDate.getTime() - progressDate.getTime();
-        const dayDiff = timeDiff / (1000 * 3600 * 24);
+      // Check today's progress if it exists and meets the goal
+      const todaysProgress = progressData.find(
+        p => p.date === checkDate.toISOString().split('T')[0],
+      );
+      if (todaysProgress && todaysProgress.cardsCompleted >= goal) {
+        streak++;
+      }
 
-        // Check if the progress date is today or consecutive days before today
-        if (dayDiff <= streak && progressData[i].cardsCompleted >= goal) {
+      // Check the previous days
+      checkDate.setDate(checkDate.getDate() - 1); // Move to the day before
+
+      while (true) {
+        const progress = progressData.find(
+          p => p.date === checkDate.toISOString().split('T')[0],
+        );
+        if (progress && progress.cardsCompleted >= goal) {
           streak++;
-          currentDate.setDate(currentDate.getDate() - 1);
+          checkDate.setDate(checkDate.getDate() - 1); // Move to the previous day
         } else {
-          break; // Break if there's a day missing in the streak
+          break; // Streak ends if a day's goal is not met or no progress is recorded
         }
       }
 
