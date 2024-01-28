@@ -206,7 +206,7 @@ export const useProgress = () => {
 
       // Check today's progress if it exists and meets the goal
       const todaysProgress = progressData.find(
-        p => p.date === checkDate.toISOString().split('T')[0],
+        p => p.date === checkDate.toLocaleDateString('en-CA'),
       );
       if (todaysProgress && todaysProgress.cardsCompleted >= goal) {
         streak++;
@@ -217,7 +217,7 @@ export const useProgress = () => {
 
       while (true) {
         const progress = progressData.find(
-          p => p.date === checkDate.toISOString().split('T')[0],
+          p => p.date === checkDate.toLocaleDateString('en-CA'),
         );
         if (progress && progress.cardsCompleted >= goal) {
           streak++;
