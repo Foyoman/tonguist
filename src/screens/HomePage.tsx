@@ -21,7 +21,6 @@ import {Progress} from '../types';
 import {HomePageProps} from '../types';
 
 // dictionary
-import {useDictionary} from '../hooks/useDictionary';
 import {fetchDictionaryNames} from '../services/dictionaryService';
 
 // components
@@ -92,7 +91,7 @@ const HomePage = ({navigation}: HomePageProps) => {
     }
   }, [fetchTodaysProgress, navigation]);
 
-  const {selectedDictionary, setSelectedDictionary} = useDictionary();
+  const {selectedDictionary, setSelectedDictionary} = useContext(AppContext);
   const handleSelectDictionary = (dictionaryName: string | null) => {
     if (dictionaryName) {
       setSelectedDictionary(dictionaryName);

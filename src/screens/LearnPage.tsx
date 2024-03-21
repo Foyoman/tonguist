@@ -35,11 +35,10 @@ import {ProgressBar} from '../components/Progress';
 
 // dictionary
 import {fetchDictionary} from '../services/dictionaryService';
-import {useDictionary} from '../hooks/useDictionary';
 import {saveDictionary} from '../utils/appStorage';
 
 const LearnPage = ({navigation}: LearnPageProps) => {
-  const {goal} = useContext(AppContext);
+  const {goal, selectedDictionary} = useContext(AppContext);
   const {themeStyles} = useContext(ThemeContext);
   const [errors, setErrors] = useState<unknown>();
   const [currentFlashcard, setCurrentFlashcard] =
@@ -51,8 +50,6 @@ const LearnPage = ({navigation}: LearnPageProps) => {
 
   const {fetchTodaysProgress, setProgressData} = useProgress();
   const [todaysProgress, setTodaysProgress] = useState<Progress>();
-
-  const {selectedDictionary} = useDictionary(); // Using custom hook
 
   const recentCardsRef = useRef<FlashcardType[]>([]);
 

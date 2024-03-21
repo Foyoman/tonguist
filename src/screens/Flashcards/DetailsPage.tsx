@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -10,9 +10,9 @@ import {Flashcard as FlashcardType} from '../../types';
 
 import ToolsLayout from '../../components/layout/ToolsLayout';
 
-import {useDictionary} from '../../hooks/useDictionary';
 import {fetchDictionary} from '../../services/dictionaryService';
 import {saveDictionary} from '../../utils/appStorage';
+import {AppContext} from '../../context/AppContext';
 
 type DetailsPageProps = {
   route: RouteProp<RootStackParamList, 'Details'>;
@@ -21,7 +21,7 @@ type DetailsPageProps = {
 
 const DetailsPage: React.FC<DetailsPageProps> = ({route, navigation}) => {
   const {flashcard} = route.params;
-  const {selectedDictionary} = useDictionary();
+  const {selectedDictionary} = useContext(AppContext);
 
   const handleEdit = () => {
     navigation.navigate('Edit', {flashcard});

@@ -14,10 +14,10 @@ import {Flashcard as FlashcardType} from '../../types';
 import {MD3Colors} from 'react-native-paper';
 import {ScrollView} from 'react-native-gesture-handler';
 
-import {useDictionary} from '../../hooks/useDictionary';
 import {fetchDictionary} from '../../services/dictionaryService';
 import {v4 as uuidv4} from 'uuid';
 import {saveDictionary} from '../../utils/appStorage';
+import {AppContext} from '../../context/AppContext';
 
 type EditPageProps = {
   route: RouteProp<RootStackParamList, 'Edit'>;
@@ -26,7 +26,7 @@ type EditPageProps = {
 
 const EditPage: React.FC<EditPageProps> = ({route, navigation}) => {
   const {themeStyles, theme} = useContext(ThemeContext);
-  const {selectedDictionary} = useDictionary(); // Using custom hook
+  const {selectedDictionary} = useContext(AppContext);
 
   const [targetPhraseInput, setTargetPhraseInput] = useState('');
   const [targetSentenceInput, setTargetSentenceInput] = useState('');

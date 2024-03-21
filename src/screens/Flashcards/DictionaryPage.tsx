@@ -31,7 +31,6 @@ import ToolsLayout from '../../components/layout/ToolsLayout';
 
 // dictionary
 import {fetchDictionary} from '../../services/dictionaryService';
-import {useDictionary} from '../../hooks/useDictionary';
 import {saveDictionary} from '../../utils/appStorage';
 
 // importation
@@ -46,9 +45,8 @@ type DictionaryPageProps = {
 };
 
 const DictionaryPage: React.FC<DictionaryPageProps> = ({navigation}) => {
-  const {removeDictionary} = useContext(AppContext);
+  const {removeDictionary, selectedDictionary} = useContext(AppContext);
   const {themeStyles, theme} = useContext(ThemeContext);
-  const {selectedDictionary} = useDictionary(); // Using custom hook
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFlashcards, setFilteredFlashcards] = useState<Flashcard[]>([]);

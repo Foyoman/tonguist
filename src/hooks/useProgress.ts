@@ -2,12 +2,10 @@
 import {useCallback, useContext} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Progress} from '../types';
-import {useDictionary} from './useDictionary';
 import {AppContext} from '../context/AppContext';
 
 export const useProgress = () => {
-  const {selectedDictionary} = useDictionary();
-  const {fetchGoal} = useContext(AppContext);
+  const {fetchGoal, selectedDictionary} = useContext(AppContext);
 
   const getTodayDateString = () => {
     const today = new Date();

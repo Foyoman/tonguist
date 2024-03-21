@@ -3,12 +3,12 @@ import {StyleSheet, View, ScrollView, Text} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {ThemeContext} from '../../context/ThemeContext';
 import {Button, Modal} from '../../components/elements';
-import {useDictionary} from '../../hooks/useDictionary';
 import {fetchDictionaryNames} from '../../services/dictionaryService';
 import {TextInput} from 'react-native-gesture-handler';
 import {MD3Colors} from 'react-native-paper';
 import {RootStackParamList} from '../../types';
 import ToolsLayout from '../../components/layout/ToolsLayout';
+import {AppContext} from '../../context/AppContext';
 
 type DictionariesPageProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Dictionaries'>;
@@ -16,12 +16,7 @@ type DictionariesPageProps = {
 
 const DictionariesPage: React.FC<DictionariesPageProps> = ({navigation}) => {
   const {themeStyles, theme} = useContext(ThemeContext);
-  const {
-    // selectedDictionary,
-    setSelectedDictionary,
-    addDictionary,
-    // removeDictionary,
-  } = useDictionary(); // Using custom hook
+  const {setSelectedDictionary, addDictionary} = useContext(AppContext); // Using context
   const [dictionaryNames, setDictionaryNames] = useState<Array<string>>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newDictionaryName, setNewDictionaryName] = useState('');
@@ -30,17 +25,12 @@ const DictionariesPage: React.FC<DictionariesPageProps> = ({navigation}) => {
   const closeModal = () => setIsModalVisible(false);
 
   const handleSaveDictionary = async () => {
-    await addDictionary(newDictionaryName);
-    await fetchData();
     closeModal();
     setNewDictionaryName('');
+    await addDictionary(newDictionaryName);
+    await setSelectedDictionary(newDictionaryName);
     navigation.navigate('Dictionary');
   };
-
-  // const handleRemoveDictionary = async (name: string) => {
-  //   await removeDictionary(name);
-  //   fetchData();
-  // };
 
   const handleSelectDictionary = (dictionaryName: string) => {
     setSelectedDictionary(dictionaryName);
